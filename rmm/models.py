@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 import os
-from sqlalchemy import Column, Integer, DateTime, func, String, ForeignKey
+from sqlalchemy import Column, Integer, DateTime, func, String, ForeignKey, desc
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -21,18 +21,31 @@ class Meme(Base):
     user_id = Column(String, ForeignKey('users.id'))
     file_type = Column(String)
     file_id = Column(String)
+    msg_id = Column(Integer)
 
-    def __init__(self, user_id, file_type, file_id):
+    def __init__(self, user_id, file_type, file_id, msg_id):
         self.posted_at = datetime.utcnow().replace(microsecond=0)
         self.user_id = user_id
         self.file_type = file_type
         self.file_id = file_id
+        self.msg_id = msg_id
 
     def save(self):
         with session_scope(engine) as session:
             session.add(self)
-            session.commit()
         return self
+
+    @staticmethod
+    def get_last(user_id):
+        with session_scope(engine) as session:
+            meme = session.query(Meme).filter_by(user_id=user_id).order_by(desc(Meme.posted_at)).first()
+            return meme
+
+    @staticmethod
+    def get_by_msg_id(msg_id):
+        with session_scope(engine) as session:
+            meme = session.query(Meme).filter_by(msg_id=msg_id).first()
+            return meme
 
     def __repr__(self):
         return f'Meme(id={self.id}, user_id={self.user_id}, file_type={self.file_type})'
@@ -50,6 +63,9 @@ class Vote(Base):
         self.user_id = user_id
         self.meme_id = meme_id
         self.mark = mark
+
+    def __repr__(self):
+        return f'Vote(id={self.id}, user_id={self.user_id}, meme_id={self.meme_id}, mark={self.mark})'
 
     def save(self):
         with session_scope(engine) as session:
@@ -80,30 +96,23 @@ class User(Base):
         self.fullname = fullname
         self.id = id
 
-    def save(self):
-        with session_scope(engine) as session:
-            session.add(self)
-            session.commit()
-        return self
-
     def __repr__(self):
         return f'User(id={self.id}, username={self.username}, fullname={self.fullname}, points={self.points})'
 
-    @staticmethod
-    def add_points(user_id, points):
+    def save(self):
         with session_scope(engine) as session:
-            user = session.query(User).filter_by(id=user_id).first()
-            user.points += points
+            session.add(self)
+        return self
+
+    def add_points(self, points):
+        with session_scope(engine) as session:
+            self.points += points
+            session.add(self)
 
     @staticmethod
-    def is_exists(id):
+    def get(user_id):
         with session_scope(engine) as session:
-            return (session.query(User).filter_by(id=id).count()) > 0
-
-    @staticmethod
-    def get(id):
-        with session_scope(engine) as session:
-            return session.query(User).filter_by(id=id).first()
+            return session.query(User).filter_by(id=user_id).first()
 
 
 def init_models():
@@ -112,5 +121,5 @@ def init_models():
 
 # Создание таблицы
 if __name__ == '__main__':
-    Vote.is_voted(1, 1)
-    # Base.metadata.create_all(engine)
+    # Vote.is_voted(1, 1)
+    Base.metadata.create_all(engine)

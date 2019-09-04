@@ -23,7 +23,7 @@ def vote_keyboard():
     keyboard = types.InlineKeyboardMarkup()
     buttons = []
     for i in range(5):
-        callback_data = f'{i + 1}'
+        callback_data = f'vote_{i + 1}'
         buttons.append(types.InlineKeyboardButton(text=str(i + 1), callback_data=callback_data))
 
     keyboard.row(*buttons)
