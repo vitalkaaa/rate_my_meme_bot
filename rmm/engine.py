@@ -72,6 +72,12 @@ class BotEngine:
             call_type = 'vote'
             mark = int(data.split('_')[-1])
             meme = Meme.get_by_msg_id(call.message.message_id)
+            user = User.get(user_id)
+
+            if user.id == meme.user_id:
+                back_text = 'Нельзя голосовать за свой мем'
+                is_voted = False
+                return {'type': call_type, 'mark': mark, 'is_voted': is_voted, 'back_text': back_text}
 
             if self.save_vote(user_id, meme.id, mark):
                 back_text = 'Вы проголосовали'
