@@ -77,7 +77,7 @@ class Vote(Base):
     @staticmethod
     def is_voted(user_id, meme_id):
         with session_scope(engine) as session:
-            query = session.query(Vote).join(Meme).filter(Meme.user_id == str(user_id), Meme.id == meme_id)
+            query = session.query(Vote).filter_by(user_id=str(user_id), meme_id=meme_id)
             is_marked = query.count() > 0
             return is_marked
 

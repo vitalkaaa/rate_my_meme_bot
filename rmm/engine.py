@@ -81,7 +81,6 @@ class BotEngine:
 
             if self.save_vote(user_id, meme.id, mark):
                 back_text = 'Вы проголосовали'
-                Vote(user_id, meme.id, mark).save()
                 is_voted = True
             else:
                 back_text = 'Вы уже голосовали за этот мем'
