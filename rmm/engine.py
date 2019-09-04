@@ -62,7 +62,7 @@ class BotEngine:
 
     def get_callback_info(self, call):
         data = call.data
-        user_id = str(call.from_user.id)
+        user_id = call.from_user.id
         call_type = None
         mark = None
         is_voted = False

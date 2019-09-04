@@ -25,7 +25,7 @@ class Meme(Base):
 
     def __init__(self, user_id, file_type, file_id, msg_id):
         self.posted_at = datetime.utcnow().replace(microsecond=0)
-        self.user_id = user_id
+        self.user_id = str(user_id)
         self.file_type = file_type
         self.file_id = file_id
         self.msg_id = msg_id
@@ -38,7 +38,7 @@ class Meme(Base):
     @staticmethod
     def get_last(user_id):
         with session_scope(engine) as session:
-            meme = session.query(Meme).filter_by(user_id=user_id).order_by(desc(Meme.posted_at)).first()
+            meme = session.query(Meme).filter_by(user_id=str(user_id)).order_by(desc(Meme.posted_at)).first()
             return meme
 
     @staticmethod
@@ -57,10 +57,11 @@ class Vote(Base):
     voted_at = Column(DateTime)
     meme_id = Column(Integer, ForeignKey('memes.id'))
     mark = Column(Integer)
+    user_id = Column(String)
 
     def __init__(self, user_id, meme_id, mark):
         self.voted_at = datetime.utcnow().replace(microsecond=0)
-        self.user_id = user_id
+        self.user_id = str(user_id)
         self.meme_id = meme_id
         self.mark = mark
 
@@ -76,7 +77,7 @@ class Vote(Base):
     @staticmethod
     def is_voted(user_id, meme_id):
         with session_scope(engine) as session:
-            query = session.query(Vote).join(Meme).filter(Meme.user_id == user_id, Meme.id == meme_id)
+            query = session.query(Vote).join(Meme).filter(Meme.user_id == str(user_id), Meme.id == meme_id)
             is_marked = query.count() > 0
             return is_marked
 
@@ -94,7 +95,7 @@ class User(Base):
         self.points = 0
         self.username = username
         self.fullname = fullname
-        self.id = id
+        self.id = str(id)
 
     def __repr__(self):
         return f'User(id={self.id}, username={self.username}, fullname={self.fullname}, points={self.points})'
@@ -112,7 +113,7 @@ class User(Base):
     @staticmethod
     def get(user_id):
         with session_scope(engine) as session:
-            return session.query(User).filter_by(id=user_id).first()
+            return session.query(User).filter_by(id=str(user_id)).first()
 
 
 def init_models():

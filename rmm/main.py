@@ -16,7 +16,7 @@ engine = BotEngine()
 
 @bot.message_handler(content_types=['text', 'video', 'photo', 'document'])
 def message_handler(message):
-    user_id = str(message.from_user.id)
+    user_id = message.from_user.id
     engine.save_user(message)
     message_info = engine.get_message_info(message)
 
@@ -40,7 +40,7 @@ def message_handler(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
-    user_id = str(call.from_user.id)
+    user_id = call.from_user.id
     engine.save_user(call)
     callback_info = engine.get_callback_info(call)
 
